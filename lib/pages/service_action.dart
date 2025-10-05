@@ -307,7 +307,6 @@ class _ServiceActionState extends State<ServiceAction> {
                                       await serviceListController.listService(
                                         refresh: true,
                                       );
-
                                       Get.toNamed('/service');
                                     } catch (e) {
                                       _formKey.currentState!.validate();

@@ -1,12 +1,21 @@
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 
 import '../models/service.dart';
 import '../services/service_service.dart';
 
-class ServiceController extends GetxController {
+class ServiceController extends GetxController  with GetTickerProviderStateMixin {
   var loading = false.obs;
   var actionLoading = false.obs;
   var downloadLoading = false.obs;
+
+
+  late final TabController tabController;
+  final TextEditingController searchController = TextEditingController();
+  final scrollController = ScrollController();
+  final completedScrollController = ScrollController();
+  final FocusNode searchFocusNode = FocusNode();
+
 
   var services = <Service>[].obs;
   var hasMore = true.obs;
@@ -37,8 +46,21 @@ class ServiceController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+    tabController = TabController(length: 2, vsync: this);
+    scrollController.addListener(loadMore);
+    completedScrollController.addListener(completedLoadMore);
     listService();
     completedListService();
+  }
+
+  @override
+  void onClose() {
+    scrollController.dispose();
+    completedScrollController.dispose();
+    tabController.dispose();
+    searchFocusNode.dispose();
+    searchController.dispose();
+    super.onClose();
   }
 
   Future<void> deleteService(id) async {
@@ -93,6 +115,8 @@ class ServiceController extends GetxController {
   }
 
   void refresh() {
+    print('refreshing');
+    print('------------------------------------------------------');
     page.value = 1;
     hasMore.value = true;
     loading.value = false;

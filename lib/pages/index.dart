@@ -2,8 +2,9 @@ import 'package:aps_app/components/GradientText.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../components/SnackBarComponent.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/notification_controller.dart';
+import 'notification.dart';
 
 class IndexPage extends StatelessWidget {
   final String title;
@@ -130,33 +131,47 @@ class IndexPage extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // TODO: Add notification logic here
+                  Get.to(() => NotificationsSimplePage());
                 },
               ),
-              // Positioned(
-              //   right: 8,
-              //   top: 8,
-              //   child: Container(
-              //     padding: const EdgeInsets.all(2),
-              //     decoration: BoxDecoration(
-              //       color: Colors.red,
-              //       borderRadius: BorderRadius.circular(10),
-              //     ),
-              //     constraints: const BoxConstraints(
-              //       minWidth: 18,
-              //       minHeight: 18,
-              //     ),
-              //     child: const Text(
-              //       '3', // TODO: Replace with dynamic count
-              //       style: TextStyle(
-              //         color: Colors.white,
-              //         fontSize: 12,
-              //         fontWeight: FontWeight.bold,
-              //       ),
-              //       textAlign: TextAlign.center,
-              //     ),
-              //   ),
-              // ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: GestureDetector(
+                  onTap: () {
+                    Get.to(() => NotificationsSimplePage());
+                  },
+                  child: GetBuilder<NotificationController>(
+                    init: NotificationController(),
+                    builder: (c) {
+                      return Obx(() {
+                        return c.totalCount > 0
+                            ? Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 18,
+                            minHeight: 18,
+                          ),
+                          child: Text(
+                            c.totalCount.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                            : const SizedBox.shrink();
+                      });
+                    },
+                  ),
+                ),
+              ),
             ],
           ),
         ],
