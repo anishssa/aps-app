@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../components/CustomAppBarComponent.dart';
-import '../components/NavIconBuilder.dart';
 import '../controllers/notification_controller.dart';
 import '../models/notification.dart';
 
@@ -13,6 +12,20 @@ class NotificationsSimplePage extends StatelessWidget {
   final RxInt deletingId = (-1).obs;
   final RxBool readingAll = false.obs;
   final RxBool deletingAll = false.obs;
+
+  Widget buildNavIcon(IconData icon) => Container(
+    width: 50,
+    height: 50,
+    decoration: const BoxDecoration(
+      shape: BoxShape.circle,
+      gradient: LinearGradient(
+        colors: [Color(0xFF0F1B2A), Color(0xFFD50009)],
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+      ),
+    ),
+    child: Icon(icon, color: Colors.white, size: 24),
+  );
 
   Widget _buildNotificationList(
     List<AppNotification> list,
@@ -103,9 +116,7 @@ class NotificationsSimplePage extends StatelessWidget {
                 }
                 final n = list[i];
                 return Card(
-                  color: isUnreadTab
-                      ? Colors.blue.shade50
-                      : Colors.grey.shade100,
+                  color: isUnreadTab ? Colors.blue.shade50 : Colors.white,
                   margin: const EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 4,
@@ -213,48 +224,67 @@ class NotificationsSimplePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: GetBuilder<NotificationController>(
-        init: NotificationController(),
-        builder: (c) {
-          return Scaffold(
-            appBar: CustomAppBarComponent(title: 'Notifications'),
-            body: Column(
-              children: [
-                TabBar(
-                  tabs: [
-                    Tab(text: 'Unread'),
-                    Tab(text: 'Read'),
-                  ],
-                ),
-                Expanded(
-                  child: Obx(() {
-                    return TabBarView(
-                      children: [
-                        _buildNotificationList(c.notifications, c, true),
-                        _buildNotificationList(c.readNotifications, c, false),
-                      ],
-                    );
-                  }),
-                ),
-              ],
-            ),
-            floatingActionButton: Obx(
-              () => readingAll.value
-                  ? CircularProgressIndicator()
-                  : FloatingActionButton(
-                      onPressed: () async => {
-                        readingAll.value = true,
-                        await c.markAllRead(),
-                        readingAll.value = false,
-                      },
-                      child: buildNavIcon(Icons.done_all)
-                    ),
-            ),
-          );
-        },
-      ),
+    return GetBuilder<NotificationController>(
+      init: NotificationController(),
+      builder: (c) {
+        return Scaffold(
+          appBar: CustomAppBarComponent(title: 'Notifications'),
+          body: Column(
+            children: [
+              TabBar(
+                controller: c.tabController,
+                tabs: [
+                  Tab(text: 'Unread'),
+                  Tab(text: 'Read'),
+                ],
+              ),
+              Expanded(
+                child: Obx(() {
+                  return TabBarView(
+                    controller: c.tabController,
+                    children: [
+                      _buildNotificationList(c.notifications, c, true),
+                      _buildNotificationList(c.readNotifications, c, false),
+                    ],
+                  );
+                }),
+              ),
+            ],
+          ),
+
+          floatingActionButton: Builder(
+            builder: (context) {
+              return Obx(() {
+                if (c.selectedTab.value == 0) {
+                  // Unread tab: show "Mark all as read"
+                  return readingAll.value
+                      ? CircularProgressIndicator()
+                      : GestureDetector(
+                          onTap: () async {
+                            readingAll.value = true;
+                            await c.markAllRead();
+                            readingAll.value = false;
+                          },
+                          child: buildNavIcon(Icons.done_all),
+                        );
+                } else {
+                  // Read tab: show "Delete all"
+                  return deletingAll.value
+                      ? CircularProgressIndicator()
+                      : GestureDetector(
+                          onTap: () async {
+                            deletingAll.value = true;
+                            await c.deleteAll();
+                            deletingAll.value = false;
+                          },
+                          child: buildNavIcon(Icons.delete_sweep),
+                        );
+                }
+              });
+            },
+          ),
+        );
+      },
     );
   }
 }

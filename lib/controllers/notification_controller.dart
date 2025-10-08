@@ -8,7 +8,7 @@ class NotificationController extends GetxController
     with GetTickerProviderStateMixin {
   final RxList<AppNotification> notifications = <AppNotification>[].obs;
   final RxList<AppNotification> readNotifications = <AppNotification>[].obs;
-  late final TabController tab;
+  late final TabController tabController;
   final scrollController = ScrollController();
   final readScrollController = ScrollController();
 
@@ -24,12 +24,13 @@ class NotificationController extends GetxController
   var readPage = 1.obs;
   var readLimit = 10.obs;
   RxInt totalCount = 0.obs;
-
+  RxInt selectedTab = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
-    tab = TabController(length: 2, vsync: this);
+    tabController = TabController(length: 2, vsync: this);
+    tabController.addListener(setSelectedTab);
     scrollController.addListener(loadMore);
     readScrollController.addListener(readLoadMore);
     notification();
@@ -40,7 +41,7 @@ class NotificationController extends GetxController
   void onClose() {
     scrollController.dispose();
     readScrollController.dispose();
-    tab.dispose();
+    tabController.dispose();
     super.onClose();
   }
 
@@ -92,6 +93,10 @@ class NotificationController extends GetxController
     }
   }
 
+  void setSelectedTab() {
+    selectedTab.value = tabController.index;
+  }
+
   void refresh() {
     page.value = 1;
     hasMore.value = true;
@@ -118,6 +123,7 @@ class NotificationController extends GetxController
     await service.markAsRead(id);
     notifications.removeWhere((e) => e.id == id);
     totalCount.value = totalCount.value - 1;
+    readRefresh();
   }
 
   Future<void> deleteOne(int id) async {
@@ -128,6 +134,7 @@ class NotificationController extends GetxController
   Future<void> markAllRead() async {
     await service.markAllAsRead();
     refresh();
+    readRefresh();
   }
 
   Future<void> deleteAll() async {
