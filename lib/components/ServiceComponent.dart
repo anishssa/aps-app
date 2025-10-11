@@ -86,17 +86,21 @@ class ServiceComponent extends StatelessWidget {
   void _downloadInvoice(BuildContext context, int id) async {
     downloadingId.value = id;
     try {
-      Directory downloadsDir;
+      Directory? downloadsDir;
       if (Platform.isAndroid) {
-        downloadsDir = Directory('/storage/emulated/0/Download/Aps');
+        downloadsDir = await getDownloadsDirectory();
       } else {
         final baseDir = await getApplicationDocumentsDirectory();
-        downloadsDir = Directory('${baseDir.path}/Aps');
+        downloadsDir = Directory('${baseDir.path}');
       }
 
-      if (!await downloadsDir.exists()) {
-        await downloadsDir.create(recursive: true);
+      if (downloadsDir == null) {
+        print('Cannot access Downloads directory');
+        return;
       }
+      print('-------------------- down   ---------------------');
+      print(downloadsDir);
+      print(downloadsDir.path);
 
       final url = '/customer/download-service/$id';
 
@@ -134,8 +138,6 @@ class ServiceComponent extends StatelessWidget {
         );
       }
     } catch (e) {
-      print('----------------------------------------');
-      print(e);
       SnackBarComponent.showError(
         context,
         'Download error: \'${e.toString()}\'',

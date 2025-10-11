@@ -19,9 +19,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Api.initializeInterceptors();
 
-  // Request storage permissions at startup
-  await _requestStoragePermission();
-
   var authController = Get.put(AuthController());
 
   await authController.init();
@@ -62,13 +59,3 @@ void main() async {
   );
 }
 
-Future<void> _requestStoragePermission() async {
-  if (await Permission.storage.request().isDenied) {
-    // You can show a dialog or message to the user here if needed
-    await Permission.storage.request();
-  }
-  // For Android 11+ MANAGE_EXTERNAL_STORAGE
-  if (await Permission.manageExternalStorage.isDenied) {
-    await Permission.manageExternalStorage.request();
-  }
-}
