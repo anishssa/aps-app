@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1023562074853",
+    "project_id": "apshome",
+    "storage_bucket": "apshome.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1023562074853:android:16c50138d245a079bf220c",
+        "android_client_info": {
+          "package_name": "com.apshome.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtmac93oiQXYGLXXwKkHaJqjhLQywlazA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

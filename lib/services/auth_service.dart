@@ -1,11 +1,13 @@
+import 'dart:math';
+
 import './../api.dart';
 import 'package:dio/dio.dart';
 
 class AuthService {
   Future<Map> login(String email, String password) async {
-
+    final token = await Api.getFcmToken();
     var res = await Api.dio().post<Map<String, dynamic>>('/login',
-        data: {'email_or_mobile': email, 'password': password}).catchError((e) {
+        data: {'email_or_mobile': email, 'password': password, 'fcm_token' : token}).catchError((e) {
       if (Api.isFailed(e.response.statusCode)) {
         throw Exception(Api.getErrorMessage(e));
       }

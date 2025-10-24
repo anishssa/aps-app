@@ -7,10 +7,12 @@ import 'dart:convert';
 import './constant.dart';
 
 class Api {
-  static final _dio = Dio(BaseOptions(
-    baseUrl: baseUrl,
-    headers: {'Content-Type': 'application/json'},
-  ));
+  static final _dio = Dio(
+    BaseOptions(
+      baseUrl: baseUrl,
+      headers: {'Content-Type': 'application/json'},
+    ),
+  );
 
   static setAuth(String token) {
     _dio.options.headers['Authorization'] = 'Bearer $token';
@@ -35,7 +37,6 @@ class Api {
   static bool isUnauthorized(statusCode) {
     return statusCode == 401;
   }
-
 
   static String getErrorMessage(dynamic e) {
     if (e is DioException) {
@@ -64,56 +65,46 @@ class Api {
   }
 
   static void initializeInterceptors() {
-    print('--------------------------- intercept init  ---------------------------');
-
     _dio.interceptors.clear();
-    _dio.interceptors.add(InterceptorsWrapper(
-      onError: (DioException error, ErrorInterceptorHandler handler) async {
-        print('--------------------------- intercept error  ---------------------------');
-
-        if (isUnauthorized(error.response?.statusCode ?? 0)) {
-          print('--------------------------- intercept error 401 ---------------------------');
-
-          // Attempt to refresh token
-          final refreshed = await _refreshToken();
-          if (refreshed) {
-            print('--------------------------- intercept error 401 refreshed ---------------------------');
-            // Retry the original request with new token
-            final opts = error.requestOptions;
-            print('--------------------------- opts  ---------------------------');
-            print(opts);
-            opts.headers['Authorization'] = _dio.options.headers['Authorization'];
-            try {
-              final response = await _dio.fetch(opts);
-              return handler.resolve(response);
-            } catch (e) {
-              // If retry fails, fall through to redirect
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (DioException error, ErrorInterceptorHandler handler) async {
+          if (isUnauthorized(error.response?.statusCode ?? 0)) {
+            // Attempt to refresh token
+            final refreshed = await _refreshToken();
+            if (refreshed) {
+              final opts = error.requestOptions;
+              opts.headers['Authorization'] =
+                  _dio.options.headers['Authorization'];
+              try {
+                final response = await _dio.fetch(opts);
+                return handler.resolve(response);
+              } catch (e) {}
             }
+
+            removeAuth();
+            _redirectToLogin();
           }
-          // If refresh fails, remove auth and redirect to login
-          removeAuth();
-          _redirectToLogin();
-        }
-        return handler.next(error);
-      },
-    ));
+          return handler.next(error);
+        },
+      ),
+    );
   }
 
   static Future<bool> _refreshToken() async {
-    print('--------------------------- intercept error 401 _refreshToken ---------------------------');
-
     try {
       final refreshToken = await _getRefreshToken();
       if (refreshToken == null) return false;
       final response = await _dio.post(
         '/refresh',
         options: Options(
-          headers: {'Authorization': 'Bearer $refreshToken', 'Content-Type': 'application/json'},
+          headers: {
+            'Authorization': 'Bearer $refreshToken',
+            'Content-Type': 'application/json',
+          },
         ),
       );
       if (isSuccess(response.statusCode ?? 0)) {
-        print('--------------------------- intercept error 401 _refreshToken succes ---------------------------');
-
         final newToken = response.data['token'];
         setAuth(newToken);
         await _saveAccessToken(response.data);
@@ -126,15 +117,11 @@ class Api {
   }
 
   static Future<String?> _getRefreshToken() async {
-    print('--------------------------- _getRefreshToken ---------------------------');
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('refresh_token');
   }
 
   static Future<void> _saveAccessToken(data) async {
-    print('--------------------------- _saveAccessToken ---------------------------');
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('token', data['token']);
     prefs.setString('refresh_token', data['refresh_token']);
@@ -142,9 +129,6 @@ class Api {
   }
 
   static Future<void> _redirectToLogin() async {
-
-    print('--------------------------- _redirectToLogin ---------------------------');
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('token');
     prefs.remove('refresh_token');
@@ -152,5 +136,13 @@ class Api {
     Get.offAllNamed('/login');
   }
 
+  static Future<void> saveFcmToken(String token) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('fcm_token', token);
+  }
 
+  static Future<String?> getFcmToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('fcm_token');
+  }
 }
