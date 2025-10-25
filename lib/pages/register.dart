@@ -203,13 +203,35 @@ class _RegisterState extends State<Register> {
                         ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  runSpacing: 4,
                   children: [
-                    const Text("By registering, you accept our "),
+                    const Text("By registering, you agree to our "),
                     GestureDetector(
-                      onTap:  () {
-                        launchUrl(Uri.parse('https://apshome.in/privacy-policy'));
+                      onTap: () {
+                        launchUrl(
+                          Uri.parse('https://apshome.in/terms-condition'),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      child: GradientText(
+                        "Terms and Conditions",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const Text(" and "),
+                    GestureDetector(
+                      onTap: () {
+                        launchUrl(
+                          Uri.parse('https://apshome.in/privacy-policy'),
+                          mode: LaunchMode.externalApplication,
+                        );
                       },
                       child: GradientText(
                         "Privacy Policy",
@@ -217,7 +239,7 @@ class _RegisterState extends State<Register> {
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
-                      )
+                      ),
                     ),
                   ],
                 ),
