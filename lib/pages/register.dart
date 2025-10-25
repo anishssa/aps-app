@@ -1,6 +1,7 @@
 import 'package:aps_app/components/GradientText.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../components/HaveAccountComponent.dart';
 import '../components/InputComponent.dart';
@@ -202,6 +203,25 @@ class _RegisterState extends State<Register> {
                         ),
                 ),
                 const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("By registering, you accept our "),
+                    GestureDetector(
+                      onTap:  () {
+                        launchUrl(Uri.parse('https://apshome.in/privacy-policy'));
+                      },
+                      child: GradientText(
+                        "Privacy Policy",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 HaveAccountComponent(
                   text: 'Already have an account?',
                   actionText: 'Sign In',

@@ -16,26 +16,61 @@ import './pages/address_action.dart';
 import './pages/product.dart';
 import 'api.dart';
 
+@pragma('vm:entry-point')
+Future<void> _bgHandler(RemoteMessage msg) async {
+  await Firebase.initializeApp();
+  // handle background data here
+  print('BG msg: ${msg.data}');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp();
   Api.initializeInterceptors();
+
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+    announcement: false,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+  );
+
+  // Background handler
+  FirebaseMessaging.onBackgroundMessage(_bgHandler);
 
   var authController = Get.put(AuthController());
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   String? token = await _fcm.getToken();
   if (token != null) {
-    print(token);
     await Api.saveFcmToken(token);
   }
+
+  // Handle background messages
+  FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async {
+    print('Received a message in background!');
+    print('Message data: ${message}');
+    print('Message data: ${message.data}');
+    if (message.notification != null) {
+      print('Notif title: ${message.notification?.title}');
+      print('Notif body : ${message.notification?.body}');
+    }
+  });
+
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    Get.toNamed('/service');
+  });
+
   // Listen for foreground messages
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print('Received a message in foreground!');
     print('Message data: ${message}');
     print('Message data: ${message.data}');
     if (message.notification != null) {
-      print('Message also contained a notification: ${message.notification}');
+      print('Notif title: ${message.notification?.title}');
+      print('Notif body : ${message.notification?.body}');
     }
   });
 
@@ -59,7 +94,7 @@ void main() async {
           ),
         ),
       ),
-      home: authController.isLoggedIn.value ?  Service() : const Login(),
+      home: authController.isLoggedIn.value ? Service() : const Login(),
       debugShowCheckedModeBanner: false,
       getPages: [
         GetPage(name: '/', page: () => const Login()),
