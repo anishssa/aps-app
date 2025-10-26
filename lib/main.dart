@@ -11,6 +11,7 @@ import './pages/profile.dart';
 import './pages/change_password.dart';
 import './pages/profile_action.dart';
 import './controllers/auth_controller.dart';
+import './controllers/notification_controller.dart';
 import './pages/forgot_password.dart';
 import './pages/address_action.dart';
 import './pages/product.dart';
@@ -19,8 +20,6 @@ import 'api.dart';
 @pragma('vm:entry-point')
 Future<void> _bgHandler(RemoteMessage msg) async {
   await Firebase.initializeApp();
-  // handle background data here
-  print('BG msg: ${msg.data}');
 }
 
 void main() async {
@@ -42,6 +41,7 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_bgHandler);
 
   var authController = Get.put(AuthController());
+  var notificationController = Get.put(NotificationController());
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   String? token = await _fcm.getToken();
   if (token != null) {
@@ -49,32 +49,27 @@ void main() async {
   }
 
   // Handle background messages
-  FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async {
-    print('Received a message in background!');
-    print('Message data: ${message}');
-    print('Message data: ${message.data}');
-    if (message.notification != null) {
-      print('Notif title: ${message.notification?.title}');
-      print('Notif body : ${message.notification?.body}');
-    }
-  });
+  FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async {});
 
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    Get.toNamed('/service');
-  });
-
-  // Listen for foreground messages
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Received a message in foreground!');
-    print('Message data: ${message}');
-    print('Message data: ${message.data}');
-    if (message.notification != null) {
-      print('Notif title: ${message.notification?.title}');
-      print('Notif body : ${message.notification?.body}');
+    if (authController.isLoggedIn.value) {
+      Get.toNamed('/service');
+    } else {
+      Get.toNamed('/');
     }
   });
 
   await authController.init();
+  // Listen for foreground messages
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    if (authController.isLoggedIn.value) {
+      notificationController.totalCount.value += 1;
+    }
+    if (message.notification != null) {
+      print('Notif title: ${message.notification?.title}');
+      print('Notif body : ${message.notification?.body}');
+    }
+  });
 
   runApp(
     GetMaterialApp(
