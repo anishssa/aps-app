@@ -41,7 +41,7 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_bgHandler);
 
   var authController = Get.put(AuthController());
-  var notificationController = Get.put(NotificationController());
+
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   String? token = await _fcm.getToken();
   if (token != null) {
@@ -60,10 +60,12 @@ void main() async {
   });
 
   await authController.init();
+
+  var notificationController = Get.put(NotificationController());
   // Listen for foreground messages
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     if (authController.isLoggedIn.value) {
-      notificationController.totalCount.value += 1;
+     notificationController.totalCount.value += 1;
     }
     if (message.notification != null) {
       print('Notif title: ${message.notification?.title}');
