@@ -20,6 +20,7 @@ class SnackBarComponent {
   }
 
   static void showError(BuildContext context, String? message) {
+    message = message?.replaceAll('Exception: ', '');
     Get.snackbar(
       'Error',
       message ?? 'An unexpected error occurred.',
