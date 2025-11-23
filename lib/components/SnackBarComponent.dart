@@ -21,6 +21,10 @@ class SnackBarComponent {
 
   static void showError(BuildContext context, String? message) {
     message = message?.replaceAll('Exception: ', '');
+    if (message != null && message.contains(' was called on null')) {
+      message = 'Please check your internet connection and try again.';
+    }
+
     Get.snackbar(
       'Error',
       message ?? 'An unexpected error occurred.',

@@ -4,18 +4,17 @@ import 'package:flutter/material.dart';
 import '../models/service.dart';
 import '../services/service_service.dart';
 
-class ServiceController extends GetxController  with GetTickerProviderStateMixin {
+class ServiceController extends GetxController
+    with GetTickerProviderStateMixin {
   var loading = false.obs;
   var actionLoading = false.obs;
   var downloadLoading = false.obs;
-
 
   late final TabController tabController;
   final TextEditingController searchController = TextEditingController();
   final scrollController = ScrollController();
   final completedScrollController = ScrollController();
   final FocusNode searchFocusNode = FocusNode();
-
 
   var services = <Service>[].obs;
   var hasMore = true.obs;
@@ -87,7 +86,10 @@ class ServiceController extends GetxController  with GetTickerProviderStateMixin
       servicesVar.clear();
     }
     if (loadingVar.value) return;
-    loadingVar.value = true;
+
+
+      loadingVar.value = true;
+
     try {
       var data = await service.listService(
         pageVar.value,

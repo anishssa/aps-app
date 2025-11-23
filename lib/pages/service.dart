@@ -137,6 +137,9 @@ class Service extends StatelessWidget {
                                   itemBuilder: (context, index) {
                                     if (index == controller.services.length) {
                                       if (controller.loading.value) {
+                                        if (controller.page.value == 1) {
+                                          return const SizedBox();
+                                        }
                                         return const Center(
                                           child: CircularProgressIndicator(),
                                         );
@@ -189,6 +192,9 @@ class Service extends StatelessWidget {
                                     if (index ==
                                         controller.completedServices.length) {
                                       if (controller.completedLoading.value) {
+                                        if (controller.page.value == 1) {
+                                          return const SizedBox();
+                                        }
                                         return const Center(
                                           child: CircularProgressIndicator(),
                                         );
